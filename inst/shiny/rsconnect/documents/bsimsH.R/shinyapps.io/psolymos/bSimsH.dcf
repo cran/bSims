@@ -1,0 +1,13 @@
+name: bSimsH
+title: bSimsH
+username:
+account: psolymos
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1092242
+bundleId: 2327048
+url: https://psolymos.shinyapps.io/bSimsH/
+when: 1565985590.02072
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: bsimsHER.R|distancefun.R
