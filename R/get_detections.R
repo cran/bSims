@@ -15,7 +15,8 @@ function(x,
   ## availability overridden
   if (x$initial_location) {
     tint <- x$duration
-    event_type <- "both"
+    ## this must be overridden in calling functions
+    #event_type <- "both"
     tlim <- NULL
   }
 
@@ -23,7 +24,7 @@ function(x,
   z <- .get_events(x, event_type=event_type, tlim=tlim)
   if (nrow(z) == 0) {
     z$d <- numeric(0)
-    z$j <- z$i # percieved individual id
+    z$j <- z$i # perceived individual id
     return(z)
   }
   ## deal with under/over counting using hclust

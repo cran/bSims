@@ -31,9 +31,11 @@ bsims_animate(x, vocal_rate = 1, move_rate = 0, duration = 10,
   initial_location=FALSE, allow_overlap=TRUE, ...)
 
 bsims_detect(x, xy = c(0, 0), tau = 1, dist_fun = NULL,
-  event_type = c("vocal", "move", "both"), ...)
+  event_type = c("vocal", "move", "both"),
+  sensitivity=1, direction=FALSE, ...)
 
-bsims_transcribe(x, tint = NULL, rint = Inf, error = 0,
+bsims_transcribe(x, tint = NULL, rint = Inf,
+  error = 0, bias = 1,
   condition=c("event1", "det1", "alldet"),
   event_type=NULL, perception=NULL, ...)
 
@@ -117,8 +119,14 @@ a vector of x and y coordinates describing the position of the observer.
 }
   \item{tau}{
 parameter of the distance function.
-Can be a single numeric value or a vector of length 3
-to provide parameter in the 3 strata (H: habitat, E: edge, R: road).
+Can be a single numeric value;
+a vector of length 2 to provide parameters for
+vocalization (1st value) and movement (2nd value) related events;
+(H: habitat, E: edge, R: road, in this order);
+a vector of length 3 to provide parameters for the 3 strata
+(H: habitat, E: edge, R: road);
+or a 3 x 2 matrix combining strata (rows) and
+vocalization/movement (columns) related parameters.
 Segmented sound attenuation is used when the values are different
 in the 3 strata (see \code{\link{dist_fun2}}).
 }
@@ -142,14 +150,31 @@ conditioning type to define availability for each individual:
 \code{"alldet"}: all detections (counting the same individual multiple times).
 }
   \item{error}{
-log scale standard deviation for distance estimation error,
+log scale standard deviation (SD) for distance estimation error,
 see \code{\link{rlnorm2}}.
+When \code{direction=TRUE}, error changes based on the angle between the observer and the individual's (random) singing direction. When the bird faces the observer (0 degrees) SD is 0, when the bird is facing away (180 degrees) SD is \code{error}. In the range between 0-180 degrees the SD is changing according to the cosine of the degree: SD*(0.5-cos(degree*pi/180)/2).
+}
+  \item{bias}{
+nonnegative numeric, the distance estimation bias. The default value (1) means no bias, <1 indicates negative bias (perceived distance is less than true distance), >1 indicates positive bias (perceived distance is higher than true distance). This acts as a multiplier and can be combined with \code{error}.
+When \code{direction=TRUE}, bias changes based on the angle between the observer and the individual's (random) singing direction. When the bird faces the observer (0 degrees) perceived distance equals the true distance, when the bird is facing away (180 degrees) perceived distance is \code{bias} * true distance. In the range between 0-180 degrees the bias is changing according to the cosine of the degree: 1+(bias-1)*(0.5-cos(degree*pi/180)/2).
 }
   \item{perception}{
 perceived number of individuals relative to the actual number of individuals.
 A non-negative number (<1 values lead to under counting,
 >1 values lead to over counting),
 or \code{NULL} (observer correctly identifies all individuals).
+}
+  \item{sensitivity}{
+non-negative numeric value indicating the sensitivity of the sensor
+receiving the signal. Can be of length 1 (applies to both vocal and movement events)
+or a named vector of length 2 (names should indicate which one
+is \code{"vocal"} or \code{"move"}). Sensitivity of 1 means that
+the process captured by \code{tau} is unaffected.
+Less than 1 values indicate lower sensitivity (effectively decreasing tau),
+larger than 1 values indicate higher sensitivity (effectively increasing tau).
+}
+  \item{direction}{
+logical. When \code{TRUE}, tau for vocalizations (not for movement) changes based on the angle between the observer and the individual's (random) singing direction. When the bird faces the observer (0 degrees) tau is unaffected, when the bird is facing away (180 degrees) tau is \code{sensitivity * tau}. In the range between 0-180 degrees the effect is changing according to the cosine of the degree (0.5-cos(degree*pi/180)/2).
 }
   \item{\dots}{
 other arguments passed to underlying functions.

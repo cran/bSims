@@ -1,8 +1,8 @@
 Package: bSims
 Type: Package
 Title: Bird Point Count Simulator
-Version: 0.2-1
-Date: 2019-12-16
+Version: 0.3-0
+Date: 2021-10-05
 Author: Peter Solymos [aut, cre] (<https://orcid.org/0000-0001-7337-1740>)
 Maintainer: Peter Solymos <solymos@ualberta.ca>
 Description: A highly scientific and utterly addictive 
@@ -17,14 +17,13 @@ Description: A highly scientific and utterly addictive
   Yip et al. (2017) <doi:10.1650/CONDOR-16-93.1>.
 License: GPL-2
 LazyLoad: yes
-LazyData: true
-Depends: intrval, mefa4, MASS, deldir
+Depends: intrval, mefa4, MASS, deldir (>= 1.0-2)
 Imports: parallel, pbapply
 URL: https://github.com/psolymos/bSims
 BugReports: https://github.com/psolymos/bSims/issues
 Suggests: knitr, rmarkdown, detect, shiny
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2019-12-17 00:34:53 UTC; Peter
+Packaged: 2021-10-06 18:15:35 UTC; PeterSolymos
 Repository: CRAN
-Date/Publication: 2019-12-20 13:40:05 UTC
+Date/Publication: 2021-10-07 07:40:25 UTC

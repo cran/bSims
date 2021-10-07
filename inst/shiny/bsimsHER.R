@@ -2,6 +2,7 @@ library(shiny)
 library(detect)
 library(bSims)
 
+MAXDIS <- 10
 EXTENT <- 10
 DURATION <- 10
 TINT <- list(
@@ -15,6 +16,7 @@ TINT <- list(
 RINT <- list(
   "0-50-100-Inf m"=c(0.5, 1, Inf),
   "0-Inf m"=c(Inf),
+  "0-50-Inf m"=c(0.5, Inf),
   "0-50-100-150-Inf m"=c(0.5, 1, 1.5, Inf),
   "0-50-100-150-200-Inf m"=c(0.5, 1, 1.5, 2, Inf),
   "0-50-100 m"=c(0.5, 1),
@@ -109,7 +111,8 @@ ui <- navbarPage("bSims (HER)",
           "Road"="R",
           "Edge and road"="ER")),
       checkboxInput("overlap", "Territory overlap allowed", TRUE),
-      checkboxInput("show_tess", "Show tessellation", FALSE)
+      checkboxInput("show_tess", "Show tessellation", FALSE),
+      checkboxInput("init_loc", "Initial location", FALSE)
     )
   ),
   tabPanel("Detect",
@@ -117,9 +120,9 @@ ui <- navbarPage("bSims (HER)",
       plotOutput(outputId = "plot_det")
     ),
     column(6,
-      sliderInput("tauH", "EDR in habitat stratum", 0, 5, 1, 0.25),
-      sliderInput("tauE", "EDR in edge stratum", 0, 5, 1, 0.25),
-      sliderInput("tauR", "EDR in road stratum", 0, 5, 1, 0.25),
+      sliderInput("tauH", "EDR in habitat stratum", 0, MAXDIS, 1, MAXDIS/200),
+      sliderInput("tauE", "EDR in edge stratum", 0, MAXDIS, 1, MAXDIS/200),
+      sliderInput("tauR", "EDR in road stratum", 0, MAXDIS, 1, MAXDIS/200),
       radioButtons("event", "Event type",
         c("Vocalization"="vocal",
           "Movement"="move",
@@ -164,6 +167,12 @@ ui <- navbarPage("bSims (HER)",
       verbatimTextOutput("settings"),
       uiOutput("clip")
     )
+  ),
+  tabPanel("Documentation",
+    column(12,
+      tags$iframe(src="https://psolymos.github.io/bSims/",
+        height=600, width="100%", frameBorder=0)
+    )
   )
 )
 
@@ -171,7 +180,7 @@ server <- function(input, output) {
   observeEvent(input$seed, {
     rv$seed <- rv$seed + 1
   })
-  dis <- seq(0, 10, 0.01)
+  dis <- seq(0, MAXDIS, MAXDIS/200)
   l <- reactive({
     set.seed(rv$seed)
     bsims_init(extent = EXTENT,
@@ -214,7 +223,8 @@ server <- function(input, output) {
       movement = input$SDm,
       mixture = 1,
       avoid = input$avoid,
-      allow_overlap = input$overlap)
+      allow_overlap = input$overlap,
+      initial_location = input$init_loc)
   })
   o <- reactive({
     bsims_detect(b(),
@@ -246,21 +256,34 @@ server <- function(input, output) {
     Ydis <- matrix(rowSums(REM), 1)
     Ddis <- matrix(RINT[[input$rint]], 1)
     if (length(TINT[[input$tint]]) > 1 && sum(REM) > 0) {
-      Mrem <- cmulti.fit(Ydur, Ddur, type="rem")
-      phi <- exp(Mrem$coef)
-      p <- 1-exp(-MaxDur*phi)
+      Mrem <- try(cmulti.fit(Ydur, Ddur, type="rem"))
+      if (!inherits(Mrem, "try-error")) {
+        phi <- exp(Mrem$coef)
+        p <- 1-exp(-MaxDur*phi)
+      } else {
+        Mrem <- NULL
+        phi <- NA
+        p <- NA
+      }
     } else {
       Mrem <- NULL
       phi <- NA
       p <- NA
     }
     if (length(RINT[[input$rint]]) > 1 && sum(REM) > 0) {
-      Mdis <- cmulti.fit(Ydis, Ddis, type="dis")
-      tau <- exp(Mdis$coef)
-      q <- if (is.infinite(MaxDis))
-        1 else (tau^2/MaxDis^2) * (1-exp(-(MaxDis/tau)^2))
-      A <- if (is.infinite(MaxDis))
-        pi * tau^2 else pi * MaxDis^2
+      Mdis <- try(cmulti.fit(Ydis, Ddis, type="dis"))
+      if (!inherits(Mdis, "try-error")) {
+        tau <- exp(Mdis$coef)
+        q <- if (is.infinite(MaxDis))
+          1 else (tau^2/MaxDis^2) * (1-exp(-(MaxDis/tau)^2))
+        A <- if (is.infinite(MaxDis))
+          pi * tau^2 else pi * MaxDis^2
+      } else {
+        Mdis <- NULL
+        tau <- NA
+        q <- NA
+        A <- NA
+      }
     } else {
       Mdis <- NULL
       tau <- NA
@@ -300,6 +323,7 @@ server <- function(input, output) {
     ",\n  movement = ", input$SDm,
     ",\n  mixture = 1",
     ",\n  allow_overlap = ", input$overlap,
+    ",\n  initial_location = ", input$init_loc,
     ",\n  tau = ", xc(c(input$tauH, input$tauE, input$tauR)),
 #    ",\n  dist_fun = NULL",
     ",\n  xy = c(0, 0)",
@@ -308,7 +332,6 @@ server <- function(input, output) {
     ",\n  rint = ", xc(RINT[[input$rint]]),
     ",\n  error = ", input$derr,
     ",\n  condition = ", xq(input$condition),
-    ",\n  event_type = ", xq(input$event),
     ",\n  perception = ", pr,
     ")", collapse="")
   })
@@ -327,9 +350,10 @@ server <- function(input, output) {
   output$plot_ani <- renderPlot({
     req(b())
     op <- par(mar=c(0,0,0,0))
-    plot(b())
+    plot(b(), event_type=input$event)
     if (input$show_tess && !is.null(b()$tess))
-      plot(b()$tess, TRUE, "tess", "none", col="grey", lty=1)
+      plot(b()$tess, add=TRUE, wlines="tess",
+        showpoints=FALSE, cmpnt_col="grey", cmpnt_lty=1)
     par(op)
   })
   output$plot_det <- renderPlot({

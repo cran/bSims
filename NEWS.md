@@ -1,4 +1,23 @@
-# Version 0.2-1, 2019-12-16
+# Version 0.3-0, 2021-10-05
+
+* Updated vignettes.
+* Addressed deldir issues in vignette due to deldir CRAN update.
+* Specified deldir version (>= 1.0-2) in `DESCRIPTION`.
+
+# Version 0.2-4, 2021-04-09
+
+* Added singing direction related anisotropy to detection and transcription.
+
+# Version 0.2-3, 2021-03-15
+
+* Shiny app fixes to allow vocalization and movement related tau values.
+
+# Version 0.2-2, 2021-01-17
+
+* Added `sensitivity` argument to `bsims_detect`.
+* Revised vignettes.
+
+# Version 0.2-1, 2019-12-16 (CRAN)
 
 * Replaced `\dontrun{}` with `\donttest{}` in Rd files.
 * Added references to Rd files and `DESCRIPTION` with DOI.

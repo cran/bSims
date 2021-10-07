@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Peter Solymos" />
+
+
+<title>Introduction to the bSims package</title>
+
+<script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+
+
+
+<link rel="stylesheet" href="data:text/css,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to the bSims package</h1>
+<h4 class="author">Peter Solymos</h4>
+
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>The <strong>bSims</strong> R package is a <em>highly scientific</em> and <em>utterly addictive</em> bird point count simulator. Highly scientific, because it implements a spatially explicit mechanistic simulation that is based on statistical models widely used in bird point count analysis (i.e. removal models, distance sampling), and utterly addictive because the implementation is designed to allow rapid interactive exploration (via <strong>shiny</strong> apps) and efficient simulation (supporting various parallel backends), thus elevating the user experience.</p>
+<p>The goals of the package are to:</p>
+<ol style="list-style-type: decimal">
+<li>allow easy <em>testing of statistical assumptions</em> and explore effects of violating these assumptions,</li>
+<li><em>aid survey design</em> by comparing different options,</li>
+<li>and most importantly, to <em>have fun</em> while doing it via an intuitive and interactive user interface.</li>
+</ol>
+<p>The simulation interface was designed with the following principles in mind:</p>
+<ol style="list-style-type: decimal">
+<li><em>isolation</em>: the spatial scale is small (local point count scale) so that we can treat individual landscapes as more or less homogeneous units (but see below how certain stratified designs and edge effects can be incorporated) and independent in space and time;</li>
+<li><em>realism</em>: the implementation of biological mechanisms and observation processes are realistic, defaults are chosen to reflect common practice and assumptions;</li>
+<li><em>efficiency</em>: implementation is computationally efficient utilizing parallel computing backends when available;</li>
+<li><em>extensibility</em>: the package functionality is well documented and easily extensible.</li>
+</ol>
+<p>This documents outlines the major functionality of the package. First we describe the motivation for the simulation and the details of the layers. Then we outline an interactive workflow to design simulation studies and describe how to run efficient simulation experiments. Finally we present some of the current limitations of the framework and how to extend the existing functionality of the package to incorporate more of the biological realism into the simulations.</p>
+</div>
+<div id="motivation" class="section level1">
+<h1>Motivation</h1>
+<p>Point-count surveys are one of the most widely used survey techniques for birds. This method involves an observer standing at a location and recording all the birds that are detected during a set amount of time within a fixed or unlimited distance away from the observer. The data collected this way are often used in trend monitoring, assessing landscape and climate change effects on bird populations, and setting population goals for conservation.</p>
+<p>Point counts provide an index of the true abundance at the survey location due to imperfect detection. A plethora of design and model based solutions exist to minimize the impacts and account for the biases due to imperfect detection. Contrary to the importance of point counts among other field methods for landbirds, there is no generally applicable simulation tool that would help better understand the possible biases and would help in aiding survey design.</p>
+<p>Currently available simulation tools are either concerned by movement trajectories of bird flocks to mitigate mortality near airports and wind farms or are very specific to statistical models. Statistical techniques are expected to provide unbiased estimates when the data generation process follows the assumptions of the model. However, testing if the model assumptions are realistic is rarely evaluated with the same rigor.</p>
+<p>The apparent lack of general purpose simulation tools for point counts can probably be attributed to the fact that reality is very complex in these situations and it is not immediately straightforward how to best tackle this complexity. To illustrate this claim, here is how ecological modellers approach bird density. Counts (Y) are described by the marginal distribution, e.g. Y ~ Poisson(DApq) where D is density (abundance per unit area), A is the survey area, p is the probability of individuals being available for sampling, whereas q is the detection probability given availability. Such a model is also viewed as a mixture distribution: N ~ Poisson(DA), Y ~ Binomial(N, pq). This gives a straightforward algorithm for generating counts under known D, A, p, q parameters, that can in turn be used to test statistical performance (unbiasedness, consistency) of N-mixture, time-removal, and distance sampling models among others.</p>
+<p>Reality, however, is often more complicated. Take for example roadside counts, which served as the main motivations for developing the simulation approaches presented in here. Bird surveys along roads are widespread due to logistical, safety, and cost considerations. This is the case, even though differences between roadside and off-road counts are well documented.These differences indicate a roadside bias due to, e.g., density, behaviour and detectability being different depending on the distance from the road. Understanding the nature and sources of roadside count bias might not lend itself to simple simulations based on the marginal distributions. Understanding roadside counts requires a spatially explicit and more mechanistic simulation approach.</p>
+<p>The bSims R package presents a spatially explicit mechanistic simulation framework. Its design is informed by statistical models widely used in the analyses of bird point count data (i.e. removal models, distance sampling). The implementation allows real time interactive exploration via Shiny apps followed by efficient simulations supporting various parallel backends.</p>
+<p>The goals of the package are to (1) allow easy testing of statistical assumptions and explore the effects of violating these assumptions; to (2) aid survey design by comparing different options; and (3) to have fun while doing this.</p>
+<p>In this paper, we demonstrate the main functionality of the package, then outline the interactive workflow to design and efficiently run simulation experiments, finally we present future directions to extend the existing functionality of the package by incorporating more biological realism into the simulations.</p>
+</div>
+<div id="design-and-implementation" class="section level1">
+<h1>Design and implementation</h1>
+<p>The simulation interface was designed with the following principles in mind:</p>
+<ul>
+<li>Isolation: the spatial scale is small (local point count scale) so that we can treat individual landscapes as more or less homogeneous units (but see below how certain stratified designs and edge effects can be incorporated) and independent in space and time;</li>
+<li>Realism: the implementation of biological mechanisms and observation processes are realistic, defaults are chosen to reflect common practice and assumptions;</li>
+<li>Efficiency: implementation is computationally efficient utilizing parallel computing backends when available;</li>
+<li>Extensibility: the package functionality is well documented and easily extensible.</li>
+</ul>
+<p>Going back to the Poisson–Binomial example, N would be a result of all the factors influencing bird abundance, such as geographic location, season, habitat suitability, number of conspecifics, competitors, or predators. Y, however, would largely depend on how the birds behave depending on the time of the day, or how the observer might detect or miss the different individuals, or count the same individual twice, etc.</p>
+<p>This series of conditional filtering of events lends itself to be represented as layers. These simulation layers are conditionally independent of each other. This design can facilitate the comparison of certain settings while keeping all the underlying layers of the realizations identical. This can help pinpointing the effects without the extra variability introduced by all the other underlying layers.</p>
+<p>The bSims package implements the following main ‘verb’ functions for simulating the conditionally independent layers:</p>
+<ul>
+<li>Initialize (<code>bsims_init</code>): the landscape is defined by the extent and possible habitat stratification;</li>
+<li>Populate (<code>bsims_populate</code>): the population of finite number of individuals within the extent of the landscape;</li>
+<li>Animate (<code>bsims_animate</code>): individual behaviours described by movement and vocalization events, i.e. the frequency of sending various types of signals;</li>
+<li>Detect (<code>bsims_detect</code>): the physical side of the observation process, i.e. transmitting and receiving the signal;</li>
+<li>Transcribe (<code>bsims_transcribe</code>): the “human” aspect of the observation process, i.e. the perception of the received signal.</li>
+</ul>
+<p>The <code>bsims_</code> part of the function helps finding the functions via autocomplete functionality of the developer environment, such as RStudio VSCode. In the next sections we will review the main options available for each of the simulation layers (see Appendix for worked examples and reproducible code).</p>
+</div>
+<div id="limitations" class="section level1">
+<h1>Limitations</h1>
+<p>The package is not equipped with all the possible ways to estimate the model parameters. It only has rudimentary removal modeling and distance sampling functionality implemented for the interactive visualization and testing purposes. Estimating parameters for more complex situations (i.e. finite mixture removal models, or via Hazard rate distance functions) or estimating abundance via multiple-visit N-mixture models etc. is outside of the scope of the package and it is the responsibility of the user to make sure those work as expected.</p>
+<p>Other intentional limitation of the package is the lack of reverse interactions between the layers. For example the presence of an observer could influence behavior of the birds close to the observer. Such features can be implemented as methods extending the current functionality.</p>
+<p>Another limitation is that this implementation considers single species. Observers rarely collect data on single species but rather count multiple species as part of the same survey. The commonness of the species, observer ability, etc. can influence the observation process when the whole community is considered. Such scenarios are also not considered at present. Although the same landscape can be reused for multiple species, and building up the simulation that way.</p>
+<p>The package considers simulations as independent in space and time. When larger landscapes need to be simulated, there might be several options: (1) simulate a larger extent and put multiple independent observers into the landscape; or (2) simulate independent landscapes in isolation. The latter approach can also address spatial and temporal heterogeneity in density, behaviour, etc. E.g. if singing rate is changing as a function of time of day, one can define the <code>vocal_rate</code> values as a function of time, and simulate independent animation layers. When the density varies in space, one can simulate independent population layers.</p>
+<p>These limitations can be addressed as additional methods and modules extending the capabilities of the package, or as added functionality to the core layer functions in future releases.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

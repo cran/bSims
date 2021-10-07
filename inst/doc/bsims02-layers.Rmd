@@ -1,9 +1,9 @@
 ---
-title: "Introduction to the bSims package"
+title: "Simulation layers in bSims"
 author: "Peter Solymos"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction}
+  %\VignetteIndexEntry{Simulation layers in bSims}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,51 +15,8 @@ knitr::opts_chunk$set(
 )
 par(mar = c(1, 1, 1, 1))
 set.seed(429)
+suppressPackageStartupMessages(library(bSims))
 ```
-
-## Introduction
-
-The **bSims** R package is a _highly scientific_ and _utterly addictive_ bird point count simulator. Highly scientific, because it implements a spatially
-explicit mechanistic simulation that is based on statistical models
-widely used in bird point count analysis (i.e. removal models, distance 
-sampling), and utterly addictive because the implementation
-is designed to allow rapid interactive exploration (via **shiny** apps)
-and efficient simulation (supporting various parallel backends),
-thus elevating the user experience.
-
-The goals of the package are to: 
-
-1. allow easy _testing of statistical assumptions_ and explore 
-  effects of violating these assumptions,
-2. _aid survey design_ by comparing different options, 
-3. and most importantly, to _have fun_ while doing it via an 
-  intuitive and interactive user interface.
-
-The simulation interface was designed with the following principles in mind:
-
-1. _isolation_: the spatial scale is small (local point count scale) 
-  so that we can treat individual landscapes as more or less homogeneous 
-  units (but see below how certain stratified designs and edge effects 
-  can be incorporated) and independent independent in space and time;
-2. _realism_: the implementation of biological 
-  mechanisms and observation processes are realistic,
-  defaults are chosen to reflect common practice and assumptions;
-3. _efficiency_: implementation is computationally efficient
-  utilizing parallel computing backends when available;
-4. _extensibility_: the package functionality is 
-  well documented and easily extensible.
-
-This documents outlines the major functionality of the package.
-First we describe the motivation for the simulation and 
-the details of the layers. Then we outline an interactive workflow
-to design simulation studies and describe how to run
-efficient simulation experiments.
-Finally we present some of the current limitations of the
-framework and how to extend the existing functionality of the
-package to incorporate more of the biological realism into
-the simulations.
-
-## Simulation layers
 
 Introductory stats books begin with the coin flip to introduce
 the binomial distribution. In R we can easily simulate
@@ -95,7 +52,7 @@ being a random variables $N \sim Poisson(DA)$, while the observed count
 being $Y \sim Binomial(N, pq)$.
 This is the exact simulation
 that we need when we want to make sure that an _estimator_
-is capable of estimating the _model_ parameters (`lambda` and `prob` here).
+can estimate the _model_ parameters (`lambda` and `prob` here).
 But such probabilistic simulations are not very useful when we are
 interested how well the _model_ captures important aspects of _reality_.
 
@@ -126,28 +83,38 @@ The conditionally independent _layers_ of a
 See this example as a sneak peek that we'll explain 
 in the following subsections:
 
-```{r intro,fig.height=5,fig.width=5}
+```{r intro,fig.width=15,fig.height=10,out.width='100%'}
 library(bSims)
 
 phi <- 0.5                 # singing rate
 tau <- 1:3                 # detection distances by strata
 tbr <- c(3, 5, 10)         # time intervals
-rbr <- c(0.5, 1, 1.5, Inf) # count radii
+rbr <- c(0.5, 1, 1.5)      # count radii
 
-l <- bsims_init(10, 0.5, 1)# landscape
-p <- bsims_populate(l, 1)  # population
+l <- bsims_init(extent=10, # landscape
+  road=0.25, edge=0.5)
+p <- bsims_populate(l,     # population
+  density=c(1, 1, 0))
 e <- bsims_animate(p,      # events
-  vocal_rate=phi)
+  vocal_rate=phi,
+  move_rate=1, movement=0.2)
 d <- bsims_detect(e,       # detections
   tau=tau)
 x <- bsims_transcribe(d,   # transcription
   tint=tbr, rint=rbr)
 
 get_table(x) # removal table
-plot(x)
+
+op <- par(mfrow=c(2,3), cex.main=2)
+plot(l, main="Initialize")
+plot(p, main="Populate")
+plot(e, main="Animate")
+plot(d, main="Detect")
+plot(x, main="Transcribe")
+par(op)
 ```
 
-### Landscape
+## Landscape
 
 The `bsims_ini` function sets up the geometry of a local landscape.
 The `extent` of the landscape determines the edge lengths of a square shaped area.
@@ -189,7 +156,7 @@ points(0, 0, pch=3)
 par(op)
 ```
 
-### Population
+## Population
 
 The `bsims_populate` function _populates_ the landscape we created by the `bsims_init` function,
 which is the first argument we have to pass to `bsims_populate`. The function returns a population
@@ -282,7 +249,7 @@ plot(bsims_populate(l4, density = D), main = "2 habitats")
 par(op)
 ```
 
-### Behavior
+## Behavior
 
 The `bsims_animate` function _animates_ the population created by the `bsims_populate` function. `bsims_animate` returns an events object (with class 'bsims_events').
 The most important arguments are governing the `duration` of the simulation in minutes,
@@ -339,7 +306,7 @@ the value of `movement`, that is the standard deviation
 of bivariate Normal kernels centered around each nest location.
 This kernel is used to simulate new locations for the movement events.
 
-```{r beh-move,fig.width=10,fig.height=10,out.width='100%'}
+```{r beh-move,fig.width=10,fig.height=5,out.width='100%'}
 e2 <- bsims_animate(p, move_rate = 1, movement = 0.25)
 
 op <- par(mfrow = c(1, 2))
@@ -389,7 +356,7 @@ Stratum related behavior groups depend on the nest location.
 Sometimes it makes sense to restrict movement even further,
 i.e. individuals do not land in certain strata
 (but can cross a stratum if `movement` is large enough).
-For example we can restrict movement into the road stratum
+For example, we can restrict movement into the road stratum
 (this requires density to be 0 in that stratum):
 
 ```{r beh-move3,fig.width=10,fig.height=5,out.width='100%'}
@@ -407,7 +374,7 @@ Another way to restrict the movement of individuals is to
 prevent the overlap based on a Voronoi tessellation
 around the nest locations. Note: we are using the update method
 here to update the `allow_overlap` argument of the 
-previous call, and also the plot method from the **deldir** package
+previous call, and the plot method from the **deldir** package
 used for tessellation.
 
 ```{r beh-move4,fig.width=10,fig.height=5,out.width='100%'}
@@ -415,13 +382,11 @@ e4 <- update(e2, allow_overlap=FALSE)
 
 op <- par(mfrow = c(1, 2))
 plot(e2, main = "Overlap")
-plot(e2$tess, add = TRUE, 
-  wlines = "tess", wpoints = "none", 
-  col = "grey", lty = 1)
+plot(e2$tess, add=TRUE, wlines="tess",
+  showpoints=FALSE, cmpnt_lty=1)
 plot(e4, main = "No overlap")
-plot(e4$tess, add = TRUE, 
-  wlines = "tess", wpoints = "none", 
-  col = "grey", lty = 1)
+plot(e4$tess, add=TRUE, wlines="tess",
+  showpoints=FALSE, cmpnt_lty=1)
 par(op)
 ```
 
@@ -431,7 +396,7 @@ fully available for the other layers applied on top.
 I.e. it is possible to study the observation process without
 any behavioral interference when `initial_location = TRUE`.
 
-### Detection
+## Detection
 
 The `bsims_detect` function _detects_ the events created by the `bsims_animate` function. `bsims_detect` returns a detections object (with class 'bsims_detections').
 The argument `xy` defines the location of the observer in the landscape.
@@ -463,11 +428,11 @@ Individuals are detected via auditory and visual cues that
 are related to vocalization or movement events, respectively.
 The `event_type` argument determines what kinds of events can be detected,
 vocalization, movement, or both. 
-Detection here refers to the Bernoulli process with probability $g(d)`
+Detection here refers to the Bernoulli process with probability $g(d)$
 given the actual linear distance between the individual at that time
 and the observer.
 The `get_detections` function extracts the events that are detected,
-the column`d` contains the distances (in 100 m units).
+the column `d` contains the distances (in 100 m units).
 
 ```{r det,fig.width=5, fig.height=5}
 (d1 <- bsims_detect(e2, tau = 2))
@@ -478,7 +443,7 @@ plot(d1)
 
 The `tau` argument can be a vector of length 3, referring to
 detection distances in the HER strata.
-When the landscape is stratified and detection distances are different
+When the landscape is stratified, and detection distances are different
 among the strata the `bsims_detect` function uses a segmented
 attenuation model along the linear distance between the
 bird and the observer.
@@ -544,14 +509,48 @@ head(get_detections(d2))
 plot(d2)
 ```
 
-### Transcription
+If you notice in the plot here, the detections (lines connecting the observer
+and the location of the events being detected) are 2 different colors.
+That's because we allowed both vocalization and movement event types to be
+detected via the `event_type = "both"` argument.
+Vocalization and movement related detections might have different detection
+function characteristics. A flyover might be seen from larger distances,
+but it can also depend on body size and coloration relative to the background.
+For this reason, the `tau` argument can also be a vector of length 2 
+to provide parameters for vocalization (1st value) and 
+movement (2nd value) related events.
+
+Let's use the `e2` object (no landscape stratification)
+and see how many individuals are hear (not seen), seen (not heard),
+and heard & seen:
+
+```{r det3,fig.width=5,fig.height=5}
+(d3 <- bsims_detect(e2, tau = c(1.5, 3), event_type = "both"))
+
+dtab <- get_detections(d3)
+tmp <- with(dtab, table(i, v))
+c("heard"=sum(tmp[,"0"] == 0 & tmp[,"1"] > 0),
+  "seen"=sum(tmp[,"0"] > 0 & tmp[,"1"] == 0),
+  "heard & seen"=sum(tmp[,"0"] > 0 & tmp[,"1"] > 0))
+
+plot(d3)
+```
+
+`tau` given as a $3 \times 2$ matrix combines strata (rows) and
+vocalization/movement (columns) related parameters,
+thus allowing the distance function to differ among the three strata
+and distinguish the event types.
+
+The `sensitivity` argument modifies `tau` (`tau * sensitivity`), it can be specified for movement or vocal events.This is a more didactic way of introducing observer or sensor related variability into the detection process. It is still the physical process that is being affected and not the perception.
+
+## Transcription
 
 The last layer of simulation is the `bsims_transcribe` function 
 that _transcribes_ the detections created by the `bsims_detect` function. `bsims_transcribe` returns a detections object (with class 'bsims_transcript').
 This layer refers to the process of the observer
 assigning detected individuals to time and distance categories.
 The `tint` argument is a vector containing the
-endpoints of the the time intervals within the total duration in minutes.
+endpoints of the time intervals within the total duration in minutes.
 `rint` defines the distance bands in 100 m units, the maximum can be
 infinite referring to an unlimited distance count.
 
@@ -598,7 +597,7 @@ get_table(x, "removal")
 get_table(x, "visits")
 ```
 
-## Statistical validity of the simulations
+# Statistical validity of the simulations
 
 We can test the validity of the simulations when all
 of the assumptions are met (that is the default)
@@ -633,7 +632,7 @@ We use the **detect** package to fit removal model and
 distance sampling model to the simulated output.
 This is handily implemented in the `estimate` method
 for the transcription objects.
-First we estimate singing rate, effective detection distance,
+First, we estimate singing rate, effective detection distance,
 and density based on truncated distance counts:
 
 ```{r Dtr}
@@ -642,7 +641,7 @@ cbind(true = c(phi=phi, tau=tau, D=Den),
   estimate = estimate(x))
 ```
 
-Next we estimate singing rate, effective detection distance,
+Next, we estimate singing rate, effective detection distance,
 and density based on unlimited distance counts:
 
 ```{r Dinf}
@@ -660,154 +659,4 @@ cbind(true = c(phi=phi, tau=tau, D=Den),
 Deviations from the assumptions and bias in density estimation
 can be done by systematically evaluating the simulations settings,
 which we describe in the next section.
-
-## Simulation workflow
-
-We recommend exploring the simulation settings 
-interactively in the **shiny** apps
-using `run_app("distfunH")` app for the homogeneous habitat case and
-the `run_app("distfunHER")` app for the stratified habitat case.
-The apps represent the simulation layers as tabs,
-the last tab presenting the settings that can be copied onto the 
-clipboard and pasted into the R session or code.
-In simple situations, comparing results from a few different settings
-might be enough.
-
-Let us consider the following simple comparison: we want to
-see how much of an effect does roads have when the only 
-effect is that the road stratum is unsuitable. Otherwise there
-are no behavioral or detectability effects of the road.
-
-```{r sim1}
-tint <- c(2, 4, 6, 8, 10)
-rint <- c(0.5, 1, 1.5, 2, Inf) # unlimited
-
-## no road
-b1 <- bsims_all(
-  road = 0,
-  density = c(1, 1, 0),
-  tint = tint,
-  rint = rint)
-## road
-b2 <- bsims_all(
-  road = 0.5,
-  density = c(1, 1, 0),
-  tint = tint,
-  rint = rint)
-b1
-b2
-```
-
-The `bsims_all` function accepts all the arguments we discussed
-before for the simulation layers. Unspecified arguments
-will be taken to be the default value.
-However, `bsims_all` does not evaluate these arguments,
-but it creates a closure with the settings.
-Realizations can be drawn as:
-
-```{r sim2}
-b1$new()
-b2$new()
-```
-
-Run multiple realizations is done as:
-
-```{r sim3,eval=FALSE}
-B <- 25  # number of runs
-bb1 <- b1$replicate(B)
-bb2 <- b2$replicate(B)
-```
-
-The replicate function takes an argument for the
-number of replicates (`B`) and returns a list of transcript objects
-with $B$ elements.
-The `cl` argument can be used to parallelize the work,
-it can be a numeric value on Unix/Linux/OSX, or a cluster object on any OS.
-The `recover = TRUE` argument allows to run simulations with error
-catching.
-
-Simulated objects returned by `bsims_all` will contain different 
-realizations and all the conditionally independent layers. 
-Use a customized layered approach if former layers are meant to be kept 
-identical across runs.
-
-In more complex situations the **shiny** apps will help identifying
-corner cases that are used to define a gradient of settings
-for single or multiple simulation options.
-Let us consider the following scenario:
-we would like to evaluate how the estimates are changing with
-increasing road width. We will use the `expand_list` function
-which creates a list from all combinations of the supplied inputs.
-Note that we need to wrap vectors inside `list()` to avoid
-interpreting those as values to iterate over.
-
-```{r grid1}
-s <- expand_list(
-  road = c(0, 0.5, 1),
-  density = list(c(1, 1, 0)),
-  tint = list(tint),
-  rint = list(rint))
-str(s)
-
-```
-
-We now can use this list of settings to run simulations for each.
-The following illustrates the use of multiple cores:
-
-```{r grid2,eval=FALSE}
-b <- lapply(s, bsims_all)
-nc <- 4 # number of cores to use
-library(parallel)
-cl <- makeCluster(nc)
-bb <- lapply(b, function(z) z$replicate(B, cl=cl))
-stopCluster(cl)
-```
-
-In some cases, we want to evaluate crossed effects of multiple
-settings. For example road width and spatial pattern (random vs. clustered):
-
-```{r grid3}
-s <- expand_list(
-  road = c(0, 0.5),
-  xy_fun = list(
-    NULL,
-    function(d) exp(-d^2/1^2) + 0.5*(1-exp(-d^2/4^2))),
-  density = list(c(1, 1, 0)),
-  tint = list(tint),
-  rint = list(rint))
-str(s)
-```
-
-## Limitations and extensions
-
-The package is not equipped with all the possible ways to estimate the
-model parameters. It only has rudimentary removal modeling and 
-distance sampling functionality implemented for the interactive
-visualization and testing purposes.
-Estimating parameters for more complex situations (i.e.
-finite mixture removal models, or via Hazard rate distance functions)
-or estimating abundance via multiple-visit N-mixture models etc. is
-outside of the scope of the package and it is the responsibility of the 
-user to make sure those work as expected.
-
-Other intentional limitation of the package is the lack of
-reverse interactions between the layers. For example
-the presence of an observer could influence behavior
-of the birds close to the observer. Such features can
-be implemented as methods extending the current functionality.
-
-Another limitation is that this implementation considers single
-species. Observers rarely collect data on single species 
-but rather count multiple species as part of the same count.
-The commonness of the species, observer ability, etc. can influence
-the observation process when the whole community is considered.
-Such scenarios are also not considered at present. Although the same
-landscape can be reused for multiple species, and building up
-the simulation that way.
-
-We do not have directionality effects of vocalization direction
-or wind related distortion of detection distances in the package,
-but that can be incorporated quite easily using a ratio relative to direct
-
-We do not have autocorrelated behaviour (vocal or movement).
 

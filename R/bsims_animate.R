@@ -43,7 +43,7 @@ function(
         vr <- matrix(vocal_rate, 3, K)
       }
     } else {
-      if (dim(vocal_rate) != c(3L, K))
+      if (all(dim(vocal_rate) != c(3L, K)))
         stop("vocal_rate dimension must be 3 x length(mixture)")
       vr <- vocal_rate
     }
@@ -106,7 +106,8 @@ function(
       movement <- 0
       mixture <- 1
       avoid <- "none"
-      Events[[i]] <- data.frame(x=0, y=0, t=0, v=0)
+      ## event_type="vocal" is the default downstream thus v=1
+      Events[[i]] <- data.frame(x=0, y=0, t=0, v=1)
     } else {
       e <- events(
         vocal_rate=vr[s[i], g[i]],
@@ -132,6 +133,10 @@ function(
       }
       Events[[i]] <- e
     }
+    ## direction added for vocalization events (NA for movement)
+    ## a=angle in degrees (0:360) relative to north clockwise
+    Events[[i]]$a <- ifelse(Events[[i]]$v == 1,
+      sample(0:359, nrow(Events[[i]]), replace=TRUE), NA)
   }
   x$vocal_rate <- vr
   x$move_rate <- mr
