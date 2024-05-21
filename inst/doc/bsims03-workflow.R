@@ -45,7 +45,6 @@ s <- expand_list(
   rint = list(rint))
 str(s)
 
-
 ## ----grid2,eval=FALSE---------------------------------------------------------
 #  b <- lapply(s, bsims_all)
 #  nc <- 4 # number of cores to use
@@ -64,4 +63,54 @@ s <- expand_list(
   tint = list(tint),
   rint = list(rint))
 str(s)
+
+## ----equal--------------------------------------------------------------------
+bsims_all(
+  road = 0.5,
+  density = 1)
+
+bsims_all(
+  list(
+    road = 0.5,
+    density = 1))
+
+bsims_all(
+  data.frame(
+    road = 0.5,
+    density = 1))
+
+## ----variables----------------------------------------------------------------
+# number of stations to visit
+n <- 5
+
+# random predictors: continuous and discrete
+x <- data.frame(x1=runif(n,-1,2), x2=rnorm(n))
+
+# density
+D <- drop(exp(model.matrix(~x2, x) %*% c(0,-0.5)))
+summary(D)
+
+# cue rate
+phi <- drop(exp(model.matrix(~x1+I(x1^2), x) %*% c(-1,-0.25,-1)))
+summary(phi)
+
+# this data frame collects the columns to be used as arguments
+s <- data.frame(
+    D=D,
+    vocal_rate = phi, 
+    duration = 10,
+    condition = "det1",
+    tau = 1)
+
+# each row from s becomes a simulation settings object
+bb <- lapply(1:n, function(i) bsims_all(s[i,]))
+
+# define how you want the data extracted
+get_counts <- function(b) {
+    o <- b$new() # simulate
+    get_table(o)[1,1]
+}
+
+x$y <- sapply(bb, get_counts)
+x
 

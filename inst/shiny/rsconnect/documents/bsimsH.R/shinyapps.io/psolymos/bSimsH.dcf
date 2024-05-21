@@ -1,0 +1,13 @@
+name: bSimsH
+title: bSimsH
+username:
+account: psolymos
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1092242
+bundleId: 3532800
+url: https://psolymos.shinyapps.io/bSimsH/
+when: 1597818844.22764
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: bsimsHER.R|distfunH.R|distfunHER.R

@@ -1,0 +1,12 @@
+name: bSimsHER
+title: bSimsHER
+username:
+account: psolymos
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1092257
+bundleId: 3201123
+url: https://psolymos.shinyapps.io/bSimsHER/
+when: 1590682877.24791
+asMultiple: FALSE
+asStatic: FALSE
