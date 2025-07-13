@@ -8,18 +8,18 @@ set.seed(429)
 suppressPackageStartupMessages(library(bSims))
 
 ## ----sim-bin,eval=FALSE-------------------------------------------------------
-#  p <- 0.5
-#  
-#  Y <- rbinom(1, size = 1, prob = p)
+# p <- 0.5
+# 
+# Y <- rbinom(1, size = 1, prob = p)
 
 ## ----sim-pois,eval=FALSE------------------------------------------------------
-#  D <- 2 # individuals / unit area
-#  A <- 1 # area
-#  p <- 0.8 # probability of availability given presence
-#  q <- 0.5 # probability of detection given availability
-#  
-#  N <- rpois(1, lambda = A * D)
-#  Y <- rbinom(1, size = N, prob = p * q)
+# D <- 2 # individuals / unit area
+# A <- 1 # area
+# p <- 0.8 # probability of availability given presence
+# q <- 0.5 # probability of detection given availability
+# 
+# N <- rpois(1, lambda = A * D)
+# Y <- rbinom(1, size = N, prob = p * q)
 
 ## ----intro,fig.width=15,fig.height=10,out.width='100%'------------------------
 library(bSims)

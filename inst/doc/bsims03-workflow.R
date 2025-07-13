@@ -33,9 +33,9 @@ b1$new()
 b2$new()
 
 ## ----sim3,eval=FALSE----------------------------------------------------------
-#  B <- 25  # number of runs
-#  bb1 <- b1$replicate(B)
-#  bb2 <- b2$replicate(B)
+# B <- 25  # number of runs
+# bb1 <- b1$replicate(B)
+# bb2 <- b2$replicate(B)
 
 ## ----grid1--------------------------------------------------------------------
 s <- expand_list(
@@ -46,12 +46,12 @@ s <- expand_list(
 str(s)
 
 ## ----grid2,eval=FALSE---------------------------------------------------------
-#  b <- lapply(s, bsims_all)
-#  nc <- 4 # number of cores to use
-#  library(parallel)
-#  cl <- makeCluster(nc)
-#  bb <- lapply(b, function(z) z$replicate(B, cl=cl))
-#  stopCluster(cl)
+# b <- lapply(s, bsims_all)
+# nc <- 4 # number of cores to use
+# library(parallel)
+# cl <- makeCluster(nc)
+# bb <- lapply(b, function(z) z$replicate(B, cl=cl))
+# stopCluster(cl)
 
 ## ----grid3--------------------------------------------------------------------
 s <- expand_list(
